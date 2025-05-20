@@ -34,9 +34,10 @@ function UploadResume() {
       {newResume && (
         <div className="space-y-2">
           <Label className="text-base font-medium">Enhanced Resume</Label>
-          <Textarea className="p-2 rounded-md whitespace-pre-wrap text-sm max-h-[400px] overflow-auto">
-            {newResume}
-          </Textarea>
+          <Textarea
+            defaultValue={newResume}
+            className="p-2 rounded-md whitespace-pre-wrap text-sm max-h-[400px] overflow-auto"
+          />
         </div>
       )}
     </div>
