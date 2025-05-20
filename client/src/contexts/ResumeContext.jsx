@@ -1,5 +1,7 @@
 import { createContext, useState } from 'react'
 import { callAI, uploadFile } from '../services/apiService.js'
+import { toast } from 'sonner'
+import { setToastId, getToastId } from './toastManager.js'
 
 const ResumeContext = createContext()
 
@@ -18,17 +20,44 @@ function ResumeProvider({ children }) {
   }
 
   const handleUpload = async () => {
-    if (!file) return alert('Please upload a file!')
-    setResumeText(await uploadFile(file))
+    const oldId = getToastId()
+    if (oldId)  toast.dismiss(oldId)
+
+    if (!file) return toast.error('Please select a file')
+
+    const id = toast.loading('Uploading resume...')
+    setToastId(id)
+
+    try {
+      const text = await uploadFile(file)
+      setResumeText(text)
+      setTimeout(() => {
+        toast.success('Resume uploaded successfully', { id })
+      }, 1000)
+    } catch (err) {
+      toast.error(`Failed to upload resume: ${err.message}`, { id })
+    }
   }
 
   const handleAI = async () => {
-    if (!resumeText || !jobDesc)
-      return alert('Please upload both resume and job description')
+    const oldId = getToastId()
+    if (oldId) toast.dismiss(oldId)
 
-    setNewResume('Enhancing...')
-    const res = await callAI(resumeText, jobDesc)
-    setNewResume(res)
+    if (!resumeText && !jobDesc)
+      return toast.error('Please upload your resume and job description')
+    if (!resumeText) return toast.error('Please upload your resume')
+    if (!jobDesc) return toast.error('Please provide the job description')
+
+    const id = toast.loading('Enhancing resume...')
+    setToastId(id)
+
+    try {
+      const res = await callAI(resumeText, jobDesc)
+      toast.success('Resume enhanced successfully', { id })
+      setNewResume(res)
+    } catch (err) {
+      toast.error(`Failed to enhance resume: ${err.message}`, { id })
+    }
   }
 
   return (
