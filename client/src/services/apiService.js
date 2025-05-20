@@ -18,9 +18,12 @@ export const callAI = async (resumeText, jobDesc) => {
       resume: resumeText,
       jobDescription: jobDesc,
     })
-    const text = removeMarkdown(res.data.output || res.data.error)
-    return text
+    console.log('AI response:', res.data.output)
+
+    const output = res.data?.output || res.data?.error || 'No response from AI'
+    return removeMarkdown(output)
   } catch (err) {
-    return 'AI call failed ' + (err.response?.data?.error || err.message)
+    const errMsg = err.response?.data?.error || err.message || 'Unknown error'
+    return `AI call failed ${errMsg}`
   }
 }

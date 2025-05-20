@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { callAI, uploadFile } from '../services/apiService.js'
 
 const ResumeContext = createContext()
@@ -20,6 +20,7 @@ function ResumeProvider({ children }) {
   const handleUpload = async () => {
     if (!file) return alert('Please upload a file!')
     setResumeText(await uploadFile(file))
+    console.log('File uploaded')
   }
 
   const handleAI = async () => {
@@ -27,8 +28,16 @@ function ResumeProvider({ children }) {
       return alert('Please upload both resume and job description')
 
     setNewResume('Enhancing...')
-    setNewResume(await callAI(resumeText, jobDesc))
+    const res = await callAI(resumeText, jobDesc)
+    console.log('res', res)
+    setNewResume(res)
+    console.log('Enhanced resume:', newResume)
   }
+
+  useEffect(() => {
+    console.log('Updated newResume:', newResume)
+  }, [newResume])
+
   return (
     <>
       <ResumeContext.Provider
