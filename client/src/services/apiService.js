@@ -18,8 +18,6 @@ export const callAI = async (resumeText, jobDesc) => {
       resume: resumeText,
       jobDescription: jobDesc,
     })
-    console.log('AI response:', res.data.output)
-
     const output = res.data?.output || res.data?.error || 'No response from AI'
     return removeMarkdown(output)
   } catch (err) {
