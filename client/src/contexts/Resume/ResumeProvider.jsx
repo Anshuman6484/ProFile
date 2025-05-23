@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { callAI, uploadFile } from '../../services/apiService.js'
 import { toast } from 'sonner'
 import ResumeContext from './ResumeContext.jsx'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 // import { setToastId } from './toastManager.js'
 
 function ResumeProvider({ children }) {
@@ -9,6 +11,9 @@ function ResumeProvider({ children }) {
   const [resumeText, setResumeText] = useState('')
   const [jobDesc, setJobDesc] = useState('')
   const [newResume, setNewResume] = useState('')
+  const [mode, setMode] = useState('balanced')
+
+  const pdfRef = useRef()
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0])
@@ -16,6 +21,37 @@ function ResumeProvider({ children }) {
 
   const handleJobDescChange = (e) => {
     setJobDesc(e.target.value)
+  }
+
+  const handleDownload = async () => {
+    if (!pdfRef.current) return toast.error('Nothing to download!')
+    const id = toast.loading('Generating PDF...')
+    try {
+      const canvas = await html2canvas(pdfRef.current, {
+        scale: 2,
+        useCORS: true,
+       })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save('tailored-resume.pdf')
+      toast.success('PDF downloaded successfully', { id })
+    } catch (err) {
+      toast.error(`Failed to generate PDF: ${err.message}`, { id })
+    }
+  }
+
+  const handleCopy = async (text) => {
+    if (!text) return toast.error('Nothing to copy!')
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Copied to clipboard')
+    } catch (err) {
+      toast.error(`Failed to copy: ${err.message}`)
+    }
   }
 
   const handleUpload = async () => {
@@ -47,7 +83,7 @@ function ResumeProvider({ children }) {
     // setToastId(id)
 
     try {
-      const res = await callAI(resumeText, jobDesc)
+      const res = await callAI(resumeText, jobDesc, mode)
       setNewResume(res)
       toast.success('Resume enhanced successfully', { id })
     } catch (err) {
@@ -64,10 +100,16 @@ function ResumeProvider({ children }) {
           resumeText,
           jobDesc,
           newResume,
+          pdfRef,
+          mode,
+          setMode,
+          setNewResume,
+          handleCopy,
           handleFileChange,
           handleJobDescChange,
           handleUpload,
           handleAI,
+          handleDownload,
         }}
       >
         {children}

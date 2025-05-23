@@ -11,10 +11,11 @@ export const uploadFile = async (file) => {
   return res.data.text
 }
 
-export const callAI = async (resumeText, jobDesc) => {
+export const callAI = async (resumeText, jobDesc, mode) => {
   const res = await axios.post('/ai', {
     resume: resumeText,
     jobDescription: jobDesc,
+    mode,
   })
   const output = res.data?.output
   if (!output) {

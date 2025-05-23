@@ -14,7 +14,7 @@ function JDInput() {
         id="job-desc"
         value={jobDesc}
         onChange={handleJobDescChange}
-        placeholder="Paste or write the job description here..."
+        placeholder="Paste or write the job description here"
         className="p-2 rounded-md whitespace-pre-wrap text-sm max-h-[400px] overflow-auto"
       />
     </div>

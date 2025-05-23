@@ -1,12 +1,13 @@
 import axios from 'axios'
+import buildPrompt from '../utils/buildPrompt.js'
 
-export const callAI = async (resume, jobDescription) => {
-  const prompt = `You are a professional resume editor. Your task is to take the resume and job description and return a new resume that is more relevant to the job. The resume is: ${resume}. The job description is: ${jobDescription}.`
+export const callAI = async (resume, jobDescription, mode) => {
+  const prompt = buildPrompt(resume, jobDescription, mode)
 
   const response = await axios.post(
-    'https://openrouter.ai/api/v1/chat/completions',
+    `${process.env.AI_API_URL}`,
     {
-      model: 'nousresearch/deephermes-3-mistral-24b-preview:free',
+      model: `${process.env.AI_MODEL}`,
       messages: [
         {
           role: 'system',
